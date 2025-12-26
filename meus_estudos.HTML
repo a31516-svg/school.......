@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meus Estudos</title>
+<style>
+body { font-family: Arial; text-align: center; margin: 0; padding: 0; background: #f4f4f4; }
+.container { max-width: 800px; margin: auto; padding: 20px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+
+.hidden { display: none; }
+
+button {
+  padding: 8px 14px;
+  margin: 4px;
+  border: none;
+  border-radius: 5px;
+  background: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+button:hover { background:#45a049; }
+
+.editor {
+  border: 1px solid #aaa;
+  min-height: 200px;
+  padding: 10px;
+  margin-top: 10px;
+  text-align: left;
+  overflow-y: auto;
+}
+
+.toolbar button {
+  background:#666;
+  margin:2px;
+}
+
+.red { color:red; }
+.blue { color:blue; }
+.yellow { color:gold; }
+.orange { color:orange; }
+.purple { color:purple; }
+
+.page {
+  border:1px solid #ccc;
+  min-height:200px;
+  margin:20px auto;
+  padding:20px;
+  width:90%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  background:#fff;
+}
+
+#listaNotas button {
+  background:#2196F3;
+  display:block;
+  width:200px;
+  margin:5px auto;
+}
+
+/* LOGIN ANIMADO */
+#login {
+  width: 320px;
+  margin: 80px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: slideFade 0.8s ease;
+}
+
+#login h2 {
+  margin-bottom: 10px;
+}
+
+#login p {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+#login input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+#login button {
+  width: 95%;
+  margin-top: 15px;
+  font-size: 15px;
+}
+
+@keyframes slideFade {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Meus Estudos</h1>
+
+<!-- LOGIN -->
+<div id="login">
+  <h2>Bem-vindo</h2>
+  <p>Entre com seu email</p>
+  <input id="email" placeholder="email@gmail.com">
+   <input id="senha" type="password" placeholder="Senha"><br><br>
+  <button onclick="login()">Entrar</button>
+</div>
+
+<!-- ANOS -->
+<div id="anos" class="hidden">
+  <h2>Escolha o Ano</h2>
+  <button onclick="abrirDisciplinas(1)">Ano 1</button>
+  <button onclick="abrirDisciplinas(2)">Ano 2</button>
+  <button onclick="abrirDisciplinas(3)">Ano 3</button>
+</div>
+
+<!-- DISCIPLINAS -->
+<div id="disciplinas" class="hidden">
+  <h2 id="anoSelecionado"></h2>
+  <div id="botoesDisciplinas"></div>
+  <br>
+  <button onclick="voltarAnos()">Voltar</button>
+</div>
+
+<!-- MODULOS -->
+<div id="modulos" class="hidden">
+  <h2 id="disciplinaSelecionada"></h2>
+  <div id="botoesModulos"></div>
+  <h3>Notas Salvas</h3>
+  <div id="listaNotas"></div>
+  <br>
+  <button onclick="voltarDisciplinas()">Voltar</button>
+</div>
+
+<!-- EDITOR -->
+<div id="editorArea" class="hidden">
+  <h3 id="tituloNota"></h3>
+  <input id="nomeNota" placeholder="Nome da Nota" readonly><br><br>
+ 
+  <button onclick="ativarEdicao()">Editar</button><br><br>
+ 
+  <div id="toolbar" class="toolbar hidden">
+    <button onclick="cmd('bold')"><b>B</b></button>
+    <button onclick="cmd('italic')"><i>I</i></button>
+    <button onclick="cmd('underline')"><u>U</u></button>
+
+    <button class="red" onclick="cor('red')">A</button>
+    <button class="blue" onclick="cor('blue')">A</button>
+    <button class="yellow" onclick="cor('gold')">A</button>
+    <button class="orange" onclick="cor('orange')">A</button>
+    <button class="purple" onclick="cor('purple')">A</button>
+
+    <button onclick="cmd('justifyLeft')">Esq</button>
+    <button onclick="cmd('justifyCenter')">Centro</button>
+    <button onclick="cmd('justifyRight')">Dir</button>
+    <button onclick="novaPagina()">Nova Página</button>
+  </div>
+
+  <div id="editor" class="editor" contenteditable="false"></div><br>
+
+  <button onclick="salvar()">Salvar</button>
+  <button onclick="voltarModulos()">Voltar</button>
+</div>
+</div>
+
+<script>
+let anoAtual = "";
+let disciplinaAtual = "";
+let notaAtual = "";
+
+// SENHA SECRETA para editar e salvar (só você)
+const senhaSecreta = "halamadrid";
+
+// LOGIN - qualquer email válido
+function login(){
+  const email = document.getElementById("email").value.trim();
+  if(!email.includes("@") || (!email.endsWith(".com") && !email.endsWith(".pt"))){
+    alert("Email inválido");
+    return;
+  }
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("anos").classList.remove("hidden");
+}
+
+// DISCIPLINAS
+function abrirDisciplinas(ano){
+  anoAtual = ano;
+  document.getElementById("anos").classList.add("hidden");
+  document.getElementById("disciplinas").classList.remove("hidden");
+  document.getElementById("anoSelecionado").innerText = "Ano " + ano;
+
+  const botoes = document.getElementById("botoesDisciplinas");
+  botoes.innerHTML = "";
+  const lista = ["Português","Programação","Redes","FQ","Arquitetura"];
+  lista.forEach(d=>{
+    const btn = document.createElement("button");
+    btn.innerText = d;
+    btn.onclick = ()=>abrirModulos(d);
+    botoes.appendChild(btn);
+  });
+}
+
+// VOLTAR ANOS
+function voltarAnos(){
+  document.getElementById("disciplinas").classList.add("hidden");
+  document.getElementById("anos").classList.remove("hidden");
+}
+
+// MODULOS
+function abrirModulos(d){
+  disciplinaAtual = d;
+  document.getElementById("disciplinas").classList.add("hidden");
+  document.getElementById("modulos").classList.remove("hidden");
+  document.getElementById("disciplinaSelecionada").innerText = d;
+
+  const botoesMod = document.getElementById("botoesModulos");
+  botoesMod.innerHTML = "";
+  if(d === "Português"){
+    for(let i=1;i<=5;i++){
+      const btn = document.createElement("button");
+      btn.innerText = "Módulo " + i;
+      btn.onclick = ()=>abrirEditor("portugues_m"+i);
+      botoesMod.appendChild(btn);
+    }
+    const gram = document.createElement("button");
+    gram.innerText = "Gramática";
+    gram.onclick = ()=>abrirEditor("portugues_gramatica");
+    botoesMod.appendChild(gram);
+  } else {
+    for(let i=1;i<=5;i++){
+      const btn = document.createElement("button");
+      btn.innerText = "Módulo " + i;
+      btn.onclick = ()=>abrirEditor(d.toLowerCase()+"_m"+i);
+      botoesMod.appendChild(btn);
+    }
+  }
+  atualizarListaNotas();
+}
+
+// VOLTAR PARA DISCIPLINAS
+function voltarDisciplinas(){
+  document.getElementById("modulos").classList.add("hidden");
+  document.getElementById("disciplinas").classList.remove("hidden");
+  document.getElementById("anoSelecionado").innerText = "Ano " + anoAtual;
+}
+
+// ABRIR EDITOR
+function abrirEditor(id){
+  notaAtual = id;
+  document.getElementById("modulos").classList.add("hidden");
+  document.getElementById("editorArea").classList.remove("hidden");
+  document.getElementById("tituloNota").innerText = id;
+
+  const saved = JSON.parse(localStorage.getItem(id) || '{}');
+  document.getElementById("nomeNota").value = saved.nome || id;
+  document.getElementById("editor").innerHTML = saved.conteudo || "";
+  document.getElementById("editor").contentEditable = false;
+  document.getElementById("toolbar").classList.add("hidden");
+}
+
+// BOTÃO EDITAR - só com senha
+function ativarEdicao(){
+  const senha = prompt("Digite a senha para editar:");
+  if(senha !== senhaSecreta){
+    alert("Senha incorreta! Não é possível editar.");
+    return;
+  }
+  document.getElementById("editor").contentEditable = true;
+  document.getElementById("toolbar").classList.remove("hidden");
+}
+
+// SALVAR NOTA - só com senha
+function salvar(){
+  const senha = prompt("Digite a senha para salvar:");
+  if(senha !== senhaSecreta){
+    alert("Senha incorreta! Não é possível salvar.");
+    return;
+  }
+  const nome = document.getElementById("nomeNota").value || "Sem Nome";
+  const conteudo = document.getElementById("editor").innerHTML;
+  localStorage.setItem(notaAtual, JSON.stringify({nome, conteudo}));
+  alert("Nota salva!");
+  atualizarListaNotas();
+}
+
+// NOVA PAGINA
+function novaPagina(){
+  const editor = document.getElementById("editor");
+  const div = document.createElement("div");
+  div.className = "page";
+  div.innerHTML = "<br>";
+  editor.appendChild(div);
+}
+
+// COMANDOS
+function cmd(c){ document.execCommand(c); }
+function cor(c){ document.execCommand("foreColor", false, c); }
+
+// VOLTAR EDITOR PARA MÓDULOS
+function voltarModulos(){
+  document.getElementById("editorArea").classList.add("hidden");
+  document.getElementById("modulos").classList.remove("hidden");
+  document.getElementById("disciplinaSelecionada").innerText = disciplinaAtual;
+  atualizarListaNotas();
+}
+
+// LISTA DE NOTAS
+function atualizarListaNotas(){
+  const lista = document.getElementById("listaNotas");
+  lista.innerHTML = "";
+  for(let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+    if(key.startsWith(disciplinaAtual.toLowerCase())){
+      const nota = JSON.parse(localStorage.getItem(key));
+      const btn = document.createElement("button");
+      btn.innerText = nota.nome || key;
+      btn.onclick = ()=>abrirEditor(key);
+      lista.appendChild(btn);
+    }
+  }
+}
+</script>
+</body>
+</html>
